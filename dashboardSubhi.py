@@ -12,6 +12,7 @@ import numpy as np
 
 path_info = 'C:/Users/subhi/OCR/Projet7/data/data_complet.csv'
 model_path = 'C:/Users/subhi/OCR/Projet7/data/finalized_model.sav'
+shap_path = 'C:/Users/subhi/OCR/Projet7/data/shap_model.sav '
 
 @st.cache #mise en cache de la fonction pour exécution unique
 def chargement_data(path):
@@ -37,6 +38,13 @@ def st_shap(plot, height=None):
 def load_model():
     m = pickle.load(open(model_path, 'rb'))
     return m
+@st.cache
+def load_shap(X):
+    sh = pickle.load(open(shap_path, 'rb'))
+    ex = load_model()
+    sh = ex.shap_values(X)
+    return sh, ex
+   
 
 def draw_chart(x1,x2,x3,f):
     # initialize list of lists 
@@ -66,6 +74,7 @@ liste_id = dataframe['SK_ID_CURR'].tolist()
 
 # Chargement le modèle
 explainer = load_model()
+#shap1 = load_shap()
 
 #affichage formulaire
 st.sidebar.title('Dashboard Scoring Credit')
@@ -76,7 +85,8 @@ dataframe = dataframe.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
 X = dataframe.drop(columns=['TARGET','NAME_FAMILY_STATUS','solvability'])
 y = dataframe['TARGET']
 
-shap_values = explainer.shap_values(X)
+#shap_values =  explainer.shap_values(X)
+shap_values, ex = load_shap(X)
 
 dataframe['EXT_SOURCE_1'] = pd.to_numeric(dataframe['EXT_SOURCE_1'], errors='coerce')
 dataframe['EXT_SOURCE_1'] = dataframe['EXT_SOURCE_1'].fillna(0)
@@ -92,7 +102,19 @@ if (int(id_input) in liste_id): #quand un identifiant correct a été saisi on a
     selected_id = dataframe[dataframe['SK_ID_CURR']==int(id_input)]
     prob = round(selected_id['solvability'].values[0],5)*100
     chaine = 'Le client n° '+str(id_input)+' a de risque de défaut **' + str(prob) + '**%'
+
+    #st.title("SHAP in Streamlit")
+
     st.markdown(chaine)
+    ttt = X.iloc[10000,:] #X.loc[X['SK_ID_CURR']==int(id_input),:]
+    st.write(ttt)
+    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], X.loc[ttt],link="logit"))
+    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], X.loc[X['SK_ID_CURR']==int(id_input),:],link="logit"))
+    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], selected_id["SK_ID_CURR"].iloc[0],link="logit"))
+    st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], X.iloc[4,:],link="logit"))
+
+
+    st.write(id_input)
     if st.sidebar.checkbox("Afficher les informations du client?"):
         st.write("Statut famille :**", selected_id["NAME_FAMILY_STATUS"].iloc[0], "**")
         st.write("Nombre d'enfant(s) :**", selected_id["CNT_CHILDREN"].iloc[0], "**")
@@ -161,5 +183,4 @@ else:
     x3 = int(x3.mean())
     draw_chart(x1,x2,x3,f)        
     
-st.title("SHAP in Streamlit")
 st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], X.loc[X['SK_ID_CURR']==int(id_input),:],link="logit"))
