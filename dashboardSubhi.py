@@ -12,7 +12,7 @@ import numpy as np
 
 path_info = 'data/data_complet.csv'
 model_path = 'data/finalized_model.sav'
-shap_path = 'data/shap_model.sav '
+shap_path = 'data/shap_model.sav'
 
 @st.cache #mise en cache de la fonction pour exécution unique
 def chargement_data(path):
