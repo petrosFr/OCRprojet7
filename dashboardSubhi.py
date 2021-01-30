@@ -29,7 +29,6 @@ def load_logo():
     logo = Image.open("img/logo.PNG") 
     return logo
 
-#@st.cache()
 def st_shap(plot, height=None):
     shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
     components.html(shap_html, height=height)
@@ -57,7 +56,6 @@ def draw_chart(x1,x2,x3,f):
     height=250,
     width=300,
     )
-    #chart_v1.display()
     st.write("", "", chart_v1)
 
 
@@ -72,9 +70,6 @@ st.sidebar.image(logo,width=200)
 dataframe = chargement_data(path_info)
 liste_id = dataframe['SK_ID_CURR'].tolist()
 
-# Chargement le modèle
-explainer = load_model()
-#shap1 = load_shap()
 
 #affichage formulaire
 st.sidebar.title('Dashboard Scoring Credit')
@@ -85,7 +80,6 @@ dataframe = dataframe.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
 X = dataframe.drop(columns=['TARGET','NAME_FAMILY_STATUS','solvability'])
 y = dataframe['TARGET']
 
-#shap_values =  explainer.shap_values(X)
 shap_values, ex = load_shap(X)
 
 dataframe['EXT_SOURCE_1'] = pd.to_numeric(dataframe['EXT_SOURCE_1'], errors='coerce')
@@ -102,22 +96,10 @@ if (int(id_input) in liste_id): #quand un identifiant correct a été saisi on a
     selected_id = dataframe[dataframe['SK_ID_CURR']==int(id_input)]
     prob = round(selected_id['solvability'].values[0],5)*100
     chaine = 'Le client n° '+str(id_input)+' a de risque de défaut **' + str(prob) + '**%'
-    #X.set_index('SK_ID_CURR', inplace=True)
-    #st.title("SHAP in Streamlit")
-
+    indexx = dataframe.index[dataframe['SK_ID_CURR']==int(id_input)].tolist()
     st.markdown(chaine)
-    #ind = X.iloc[int(id_input),:] #X.loc[X['SK_ID_CURR']==int(id_input),:]
-    #st.write(ind)
-    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], X.loc[ttt],link="logit"))
-    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], X.loc[X['SK_ID_CURR']==int(id_input),:],link="logit"))
-    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], selected_id["SK_ID_CURR"].iloc[0],link="logit"))
-    st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][99,:], X.iloc[99,:],link="logit"))
-    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][1,:], X.iloc[0,:],link="logit"))
-    #"shap.force_plot(explainer.expected_value[1], shap_values[1][1,:], X.iloc[1,:])"
-    #st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][0,:], X.loc[X['SK_ID_CURR']==int(id_input),:],link="logit"))
+    st_shap(shap.force_plot(ex.expected_value[1], shap_values[1][indexx[0],:], X.iloc[indexx[0],:]))
 
-
-    #st.write(id_input)
     if st.sidebar.checkbox("Afficher les informations du client?"):
         st.write("Statut famille :**", selected_id["NAME_FAMILY_STATUS"].iloc[0], "**")
         st.write("Nombre d'enfant(s) :**", selected_id["CNT_CHILDREN"].iloc[0], "**")
@@ -150,8 +132,6 @@ if (f=='DAYS_BIRTH'):
     x3 = int(x3.mean())
     draw_chart(x1,x2,x3,f)
 elif(f=='EXT_SOURCE_1'):
-    #dataframe['EXT_SOURCE_1'] = pd.to_numeric(dataframe['EXT_SOURCE_1'], errors='coerce')
-    #dataframe['EXT_SOURCE_1'] = dataframe['EXT_SOURCE_1'].fillna(0)
     x1 = selected_id[f].iloc[0]
     x2 = dataframe.loc[dataframe['TARGET'] == 1, f]
     x3 = dataframe.loc[dataframe['TARGET'] == 0, f]
@@ -159,8 +139,6 @@ elif(f=='EXT_SOURCE_1'):
     x3 = x3.mean()
     draw_chart(x1,x2,x3,f)
 elif(f=='EXT_SOURCE_2'):
-    #dataframe['EXT_SOURCE_2'] = pd.to_numeric(dataframe['EXT_SOURCE_2'], errors='coerce')
-    #dataframe['EXT_SOURCE_2'] = dataframe['EXT_SOURCE_2'].fillna(0)
     x1 = selected_id[f].iloc[0]
     x2 = dataframe.loc[dataframe['TARGET'] == 1, f]
     x3 = dataframe.loc[dataframe['TARGET'] == 0, f]
@@ -168,8 +146,6 @@ elif(f=='EXT_SOURCE_2'):
     x3 = x3.mean()
     draw_chart(x1,x2,x3,f)
 elif(f=='EXT_SOURCE_3'):
-    #dataframe['EXT_SOURCE_3'] = pd.to_numeric(dataframe['EXT_SOURCE_3'], errors='coerce')
-    #dataframe['EXT_SOURCE_3'] = dataframe['EXT_SOURCE_3'].fillna(0)
     x1 = selected_id[f].iloc[0]
     print(x1)
     x2 = dataframe.loc[dataframe['TARGET'] == 1, f]
@@ -184,6 +160,4 @@ else:
     x3 = dataframe.loc[dataframe['TARGET'] == 0, f]
     x2 = int(x2.mean())
     x3 = int(x3.mean())
-    draw_chart(x1,x2,x3,f)        
-    
-st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], X.loc[X['SK_ID_CURR']==int(id_input),:],link="logit"))
+    draw_chart(x1,x2,x3,f)
