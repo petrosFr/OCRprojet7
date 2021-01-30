@@ -26,7 +26,7 @@ def chargement_info(path):
 
 @st.cache
 def load_logo():
-    logo = Image.open("img/logo.png") 
+    logo = Image.open("img/logo.PNG") 
     return logo
 
 #@st.cache()
