@@ -10,9 +10,9 @@ import pickle
 import altair as alt
 import numpy as np
 
-path_info = 'C:/Users/subhi/OCR/Projet7/data/data_complet.csv'
-model_path = 'C:/Users/subhi/OCR/Projet7/data/finalized_model.sav'
-shap_path = 'C:/Users/subhi/OCR/Projet7/data/shap_model.sav '
+path_info = 'data/data_complet.csv'
+model_path = 'data/finalized_model.sav'
+shap_path = 'data/shap_model.sav '
 
 @st.cache #mise en cache de la fonction pour exécution unique
 def chargement_data(path):
