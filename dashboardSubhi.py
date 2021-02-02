@@ -161,3 +161,4 @@ else:
     x2 = int(x2.mean())
     x3 = int(x3.mean())
     draw_chart(x1,x2,x3,f)
+    
