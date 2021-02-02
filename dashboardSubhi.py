@@ -43,7 +43,6 @@ def load_shap(X):
     ex = load_model()
     sh = ex.shap_values(X)
     return sh, ex
-   
 
 def draw_chart(x1,x2,x3,f):
     # initialize list of lists 
@@ -120,7 +119,7 @@ st.sidebar.pyplot(fig1)
 vals= np.abs(shap_values[0])
 feature_importance = pd.DataFrame(list(zip(X.columns, sum(vals))), columns=['col_name','feature_importance_vals'])
 feature_importance.sort_values(by=['feature_importance_vals'], ascending=False,inplace=True)
-val = feature_importance['col_name'].head(7)
+val = feature_importance['col_name'].head(6)
 
 f = st.selectbox('Choose your feature',val.tolist())
 st.write(f)
